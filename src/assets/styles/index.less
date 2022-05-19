@@ -1,7 +1,15 @@
 .container {
-  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
   margin: 20px;
-  
+  .left{
+    width: 50vw;
+    height: 100vh;
+  }
+  .right{
+    width: 50vh;
+    height: 100vh;
+  };
   .wraper {
     display: inline-block;
     text-align: center;
@@ -18,5 +26,13 @@
     #canvasImg {
       visibility: hidden;
     }
+  }
+  #emotionPie{
+    width: 40vw;
+    height: 40vh;
+    padding: 5vh;
+    border: 1px solid gainsboro;
+    border-radius: 50px ;
+    box-shadow: 10px 10px 5px #888888;
   }
 }

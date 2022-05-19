@@ -1,4 +1,6 @@
 require('./assets/styles/index.less');
+const request = require('./request.js');
+const myChart = require('./charts.js');
 const faceapi = require('./assets/face-api/face-api.js');
 const errorMap = {
   'NotAllowedError': '摄像头已被禁用，请在当前浏览器设置中开启后重试',
@@ -13,7 +15,7 @@ const errorMap = {
 class FaceDetection {
   constructor(options) {
     this.options = Object.assign({
-      matchedScore: 0.9,
+      matchedScore: 0.95,
       mediaSize: {
         width: 540,
         height: 325
@@ -22,6 +24,7 @@ class FaceDetection {
 
     this.timer = null;
     this.mediaStreamTrack = null; // 摄像头媒体流
+    this.enableCheck = true;
 
     this.videoEl = document.querySelector('#videoEl'); // 视频区域
     this.trackBoxEl = document.querySelector('#trackBox'); // 人脸框绘制区域
@@ -41,7 +44,7 @@ class FaceDetection {
 
   // 设置相关容器大小
   resize() {
-    const tmp = [this.videoEl, this.canvasImgEl];
+    const tmp = [this.videoEl,this.canvasImgEl];
     for (let i = 0; i < tmp.length; i++) {
       tmp[i].width = this.options.mediaSize.width;
       tmp[i].height = this.options.mediaSize.height;
@@ -77,6 +80,7 @@ class FaceDetection {
       this.mediaStreamTrack = await navigator.getUserMedia(mediaOpt)
         .catch(this.mediaErrorCallback);
     }
+    console.log(this.mediaStreamTrack);
     this.initVideo();
   }
 
@@ -92,22 +96,47 @@ class FaceDetection {
     // "开始验证" 按钮
     this.compareBtnEl.onclick = () => {
       // 获取当前视频流中的图像，并通过 canvas 绘制出来
-      this.canvasImgEl.getContext('2d').drawImage(this.videoEl, 0, 0, this.canvasImgEl.width, this.canvasImgEl.height);
+      // this.canvasImgEl.getContext('2d').drawImage(this.videoEl, 0, 0, this.canvasImgEl.width, this.canvasImgEl.height);
       // 将绘制的图像转化成 图片的 base64 编码
       let image = this.canvasImgEl.toDataURL('image/png');
+      let postdata = {img:[image]};
       // TODO:对图片分base64存储一下，作为后续接口参数
+      request('http://127.0.0.1:5000/analyze','post',postdata).then((data)=>{
+        console.log(data);
+      })
       // 百度人脸识别API要求图片不需要包括头部信息，仅base64编码即可 
       image = image.replace('data:image/png;base64,', '');
     };
   }
 
+  facecheck() {
+    this.enableCheck=false;
+    // 获取当前视频流中的图像，并通过 canvas 绘制出来
+    this.canvasImgEl.getContext('2d').drawImage(this.videoEl, 0, 0, this.canvasImgEl.width, this.canvasImgEl.height);
+    // 将绘制的图像转化成 图片的 base64 编码
+    let image = this.canvasImgEl.toDataURL('image/png');
+    let postdata = {img:[image]};
+    // TODO:对图片分base64存储一下，作为后续接口参数
+    request('http://127.0.0.1:5000/analyze','post',postdata).then((data)=>{
+      console.log(data);
+      console.log(data.instance_1.emotion);
+      myChart._setEmotion(data.instance_1.emotion,false);
+      
+    }).catch((err)=>{console.log(err)}).finally(()=>{
+      this.enableCheck = true;
+      this.onPlay();
+    })
+
+  }
   // 初始化视频流
   initVideo(stream) {
     this.videoEl.onplay = () => {
       this.onPlay();
+      console.log("111");
     };
     this.videoEl.srcObject = this.mediaStreamTrack;
     setTimeout(() => this.onPlay(), 300);
+    myChart._setEmotion({});
   }
 
   // 获取媒体流错误处理
@@ -128,20 +157,20 @@ class FaceDetection {
     // 设置 TinyFaceDetector 模型参数：inputSize 输入视频流大小  scoreThreshold 人脸评分阈值
     const faceDetectionTask = await faceapi.detectSingleFace(this.videoEl, new faceapi.TinyFaceDetectorOptions({
       inputSize: 512,
-      scoreThreshold: 0.6
+      scoreThreshold: 0.4
     }));
 
     // 判断人脸扫描结果
     if (faceDetectionTask) {
       // 画布绘制人脸线框
       this.drawFaceBox(this.videoEl, this.trackBoxEl, [faceDetectionTask], faceDetectionTask.score)
-      if (faceDetectionTask.score > this.options.matchedScore) {
+      if (this.enableCheck&&(faceDetectionTask.score > this.options.matchedScore)) {
+        this.facecheck();
         console.log(`检测到人脸，匹配度大于 ${this.options.matchedScore}`);
         this.showEl(this.operationEl);
-        // 人脸符合要求，暂停视频流
-        
+        // 人脸符合要求，暂停视频流 
         // TODO: 调用后端接口进行身份验证
-        return;
+      
       }
     }
     this.timer = setTimeout(() => this.onPlay());

@@ -10,17 +10,19 @@
 
 <body>
   <div class="container">
+    <div class="left">
     <div class="wraper">
-      <p>人脸识别身份验证</p>
-      <p>【温馨提示：请保持光线充足，并正对摄像头】</p>
-      <video id="videoEl" autoplay muted></video>
+      <div class="video_box">
+        <p style="margin-bottom: 3vh ;">【温馨提示：请保持光线充足，并正对摄像头】</p>
+        <video id="videoEl" autoplay muted></video>
       <canvas id="trackBox"></canvas>
-      <div class="operation">
-        <button class="js-retry">重新选择</button>
-        <button class="js-compare">开始验证</button>
       </div>
-    </div> 
-    <canvas id="canvasImg"></canvas>
+    </div>
+  </div>
+  <div class="right">
+    <div id="emotionPie"></div>
+  </div> 
+    <canvas id="canvasImg" style="position:fixed;left:100%;"></canvas>
   </div>
 </body>
 
