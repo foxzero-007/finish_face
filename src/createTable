@@ -1,0 +1,23 @@
+function CreateTable(data, width, height) {
+            this.data = data;
+            this.width = width;
+            this.height = height;
+        }
+        CreateTable.prototype.outTable = function () {
+            let _data=this.data;
+            var _width = this.width;
+            var _height = this.height;
+            var _html = '<table>';
+          
+            for (let i = 0; i < _data.length; i++) {
+                _html += '<tr>';
+                for (let c in _data[i]) {
+                    _html += '<td width="' + _width + '" height="' + _height + '">'+_data[i][c]+'</td>';
+                }
+                _html += '</tr>';
+            }
+            _html += '</table>';
+           return _html;
+        }
+
+module.exports = CreateTable
