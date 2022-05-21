@@ -2,6 +2,7 @@ require('./assets/styles/index.less');
 const request = require('./request.js');
 const myChart = require('./charts.js');
 const ageChart = require('./ageCharts');
+const CreateTable = require('./createTable');
 const faceapi = require('./assets/face-api/face-api.js');
 const errorMap = {
   'NotAllowedError': '摄像头已被禁用，请在当前浏览器设置中开启后重试',
@@ -33,6 +34,8 @@ class FaceDetection {
     this.operationEl = document.querySelector('.operation'); // 操作按钮
     this.retryBtnEl = document.querySelector('.js-retry');
     this.compareBtnEl = document.querySelector('.js-compare');
+    this.tableArea = document.querySelector('.dataShow');
+    this.table = new CreateTable(230,10);
 
     this.init();
   }
@@ -122,6 +125,8 @@ class FaceDetection {
       console.log(data);
       console.log(data.instance_1.emotion);
       myChart._setEmotion(data.instance_1.emotion,false);
+      ageChart._setAge(data.instance_1);
+      this.tableArea.innerHTML=this.table.outTable(data.instance_1);
       
     }).catch((err)=>{console.log(err)}).finally(()=>{
       this.enableCheck = true;
@@ -139,6 +144,7 @@ class FaceDetection {
     setTimeout(() => this.onPlay(), 300);
     myChart._setEmotion({});
     ageChart._setAge({});
+    this.tableArea.innerHTML=this.table.outTable({});
   }
 
   // 获取媒体流错误处理
