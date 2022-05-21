@@ -3,7 +3,7 @@ var echarts = require('echarts');
 var chartDom = document.getElementById('emotionPie');
 var myChart = echarts.init(chartDom);
 
-myChart._setEmotion = ({angry=1,disgust=1,fear=1,happy=1,sad=1,surprise=1,neutral=1})=>{
+myChart._setEmotion = ({angry=50,disgust=60,fear=10,happy=30,sad=25,surprise=15,neutral=90})=>{
   console.log("mycharts");
   // const option = {
   //   title: {

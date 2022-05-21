@@ -1,6 +1,7 @@
 require('./assets/styles/index.less');
 const request = require('./request.js');
 const myChart = require('./charts.js');
+const ageChart = require('./ageCharts');
 const faceapi = require('./assets/face-api/face-api.js');
 const errorMap = {
   'NotAllowedError': '摄像头已被禁用，请在当前浏览器设置中开启后重试',
@@ -17,8 +18,8 @@ class FaceDetection {
     this.options = Object.assign({
       matchedScore: 0.95,
       mediaSize: {
-        width: 540,
-        height: 325
+        width: 600,
+        height: 300,
       }
     }, options);
 
@@ -137,6 +138,7 @@ class FaceDetection {
     this.videoEl.srcObject = this.mediaStreamTrack;
     setTimeout(() => this.onPlay(), 300);
     myChart._setEmotion({});
+    ageChart._setAge({});
   }
 
   // 获取媒体流错误处理
